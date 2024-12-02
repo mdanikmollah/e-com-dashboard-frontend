@@ -3,9 +3,12 @@ import { IoSearchOutline } from "react-icons/io5";
 import { IoSettingsOutline } from "react-icons/io5";
 import { IoIosArrowForward, IoMdNotificationsOutline } from "react-icons/io";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { axiosInstance } from "../../axios/axiosInstance";
+import Cookies from "js-cookie";
 
 const Navbar = ({ setIsOpen, isOpen }) => {
+  const navigate = useNavigate()
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
   };
@@ -16,6 +19,30 @@ const Navbar = ({ setIsOpen, isOpen }) => {
   const toogleDropdown = () => {
     setIsOpenProfile(!isOpenProfile);
   };
+
+  const handleLogout = async ()=> {
+    console.log("aaa");
+    
+    try {
+      const res = await axiosInstance.post(
+        "/user/logout",{},{
+          headers:{
+            "Authorization": Cookies.get("accessToken")
+          }
+          
+        }
+        
+      );
+      // console.log(Authorization);
+      console.log("res",res);
+      if (res.data.statusCode === 200) {
+        Cookies.remove("accessToken")
+        navigate("/login")
+      }
+    } catch (error) {
+      console.log("wwe",error);
+    }
+  }
 
   return (
     <nav className="py-4 flex justify-between border-b-2">
@@ -61,7 +88,7 @@ const Navbar = ({ setIsOpen, isOpen }) => {
                       <Link to="/profile">see profile</Link>
                     </li>
                     <li className="py-2 px-4 hover:bg-gray-100">
-                      <Link href="#">Logout</Link>
+                      <button onClick={handleLogout}>Logout</button>
                     </li>
                   </ul>
                 </div>

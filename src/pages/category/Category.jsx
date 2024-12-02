@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useCreateCategoryMutation, useGetCategoriesQuery } from "../../redux/apiSlice";
 
 const Category = () => {
   const [categoryInput, setCategoryInput] = useState({
-    categoryName: "",
+    name: "",
     slug: "",
   });
-
+  const [createCategory,{ data, isSuccess, isLoading, isError, error }] = useCreateCategoryMutation()
+  const { data:isData, isLoading:isLoad } = useGetCategoriesQuery()
   //  handle category input
   const handleCategoryInput = (e) => {
     let categoryInputInfo = { ...categoryInput };
@@ -15,10 +17,14 @@ const Category = () => {
 
   // handle create category
   const handleCreateCategory = (e) => {
-    console.log(categoryInput);
-    setCategoryInput({ categoryName: "", slug: "" });
+    createCategory(categoryInput);
+    setCategoryInput({ name: "", slug: "" });
     e.preventDefault();
   };
+  useEffect(()=>{
+    console.log(isData);
+    
+  },[isData])
   return (
     <main>
       <div>
@@ -37,8 +43,8 @@ const Category = () => {
               <input
                 type="text"
                 placeholder="Enter Category Name"
-                name="categoryName"
-                value={categoryInput.categoryName}
+                name="name"
+                value={categoryInput.name}
                 onChange={handleCategoryInput}
                 className="w-full outline-none border border-borderColor p-3 rounded-lg"
               />
@@ -65,6 +71,11 @@ const Category = () => {
           </div>
         </form>
       </section>
+      {
+        isLoad ? <p>Loading...................</p> :isData?.data.map(({name})=>(
+          <p>{name}</p>
+        ))
+      }
     </main>
   );
 };

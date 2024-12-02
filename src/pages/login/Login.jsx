@@ -1,8 +1,15 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { axiosInstance } from "../../axios/axiosInstance";
+import Cookies from "js-cookie";
 
 const Login = () => {
+  const navigate = useNavigate()
+  useEffect(()=>{
+    if (Cookies.get("accessToken")) {
+      navigate("/")
+    }
+  },[navigate])
   const [loginFields, setLoginFields] = useState({
     email: "",
     password: "",
@@ -15,25 +22,45 @@ const Login = () => {
     setLoginFields(loginInfo);
     e.preventDefault();
   };
+//console.log(loginFields);
 
-  // handle sign up
+  //handle sign up
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
       const res = await axiosInstance.post("/user/login",loginFields);
       console.log("res",res);
-      // Cookies.set('accessToken', res.data.accessToken, { expires: 1 })
+      if (res.data.statusCode == 200 && res.data.data.user.role == "admin") {
+        Cookies.set('accessToken', res.data.data.accessToken, { expires: 1 })
+        navigate("/");
+      }else{
+        alert("invalid")
+      }
       
       setLoginFields({
         email: "",
         password: "",
       });
-      
+     
     } catch (error) {
       console.log("ss",error);
     }
    
   };
+
+  // const handleSignUp = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const res = await axiosInstance.post("/user/login", loginFields);
+  //     Cookies.set("accessToken", res.data.data.accessToken, { expires: 1 });
+  //     setLoginFields({ email: "", password: "" });
+  //     navigate("/"); // Navigate after successful login
+  //   } catch (error) {
+  //     console.log("Error:", error);
+  //   }
+  // };
+
+
   return (
     <main>
       <section className="container">
